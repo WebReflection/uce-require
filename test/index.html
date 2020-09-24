@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>uce-template</title>
+  <script defer src="https://unpkg.com/uce"></script>
+  <script defer src="../index.js"></script>
+  <script type="json" is="uce-require">
+  {
+    "reactive-props/state": "../node_modules/reactive-props/state.js"
+  }
+  </script>
+  <script>
+  customElements.whenDefined('uce-require').then(() => {
+    customElements.get('uce-require').load.then(require => {
+      console.log(require('reactive-props/state'));
+    });
+  });
+  </script>
+</head>
+<body>
+</body>
+</html>
