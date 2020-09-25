@@ -16,9 +16,9 @@ export const asCJS = (esm, require) => {
       (_, $1, $2) => $1 + 'require(' + $2 + ')'
     )
     .replace(
-      /(^|[\r\n])\s*import\s*([^\3]+?)(\s+from\s*)((['|"])[^\5]+?\5)/g,
+      /(^|[\r\n])\s*import\s*([^\3]+?)(\s*from\s*)((['|"])[^\5]+?\5)/g,
       (_, $1, $2, $, $3) => (
-        $1 + 'const ' + $2.replace(/\s+as\s+/g, ': ') + ' = require(' + $3 + ')'
+        $1 + 'const ' + $2.replace(/\s+as\s+/g, ':') + ' = require(' + $3 + ')'
       )
     )
     .replace(
