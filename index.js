@@ -52,22 +52,17 @@ self.uceRequire = (function (exports) {
     if (require) {
       imports.forEach(function (key) {
         if (!(key in cache)) {
-          var module = null; // external files
-
-          if (/^(?:[./]|https?:)/.test(key)) {
-            cache[key] = module;
-            all.push(load(key, key));
-          } // resolved lazily
-          else all.push(new Promise$1(function ($) {
-              defineProperty(cache, key, {
-                get: function get() {
-                  return module;
-                },
-                set: function set(value) {
-                  $(module = value);
-                }
-              });
-            }));
+          var module = /^(?:[./]|https?:)/.test(key) ? load(key, key) : new Promise$1(function ($) {
+            defineProperty(cache, key, {
+              get: function get() {
+                return module;
+              },
+              set: function set(value) {
+                $(module = value);
+              }
+            });
+          });
+          all.push(cache[key] = module);
         }
       });
       return new Promise$1(function ($) {

@@ -50,22 +50,17 @@ export const asCJS = (esm, require) => {
   if (require) {
     imports.forEach(key => {
       if (!(key in cache)) {
-        let module = null;
-        // external files
-        if (/^(?:[./]|https?:)/.test(key)) {
-          cache[key] = module;
-          all.push(load(key, key));
-        }
-        // resolved lazily
-        else
-          all.push(new Promise($ => {
+        let module = /^(?:[./]|https?:)/.test(key) ?
+          load(key, key) :
+          new Promise($ => {
             defineProperty(cache, key, {
               get() { return module; },
               set(value) {
                 $(module = value);
               }
             })
-          }));
+          });
+        all.push(cache[key] = module);
       }
     });
     return new Promise($ => {
