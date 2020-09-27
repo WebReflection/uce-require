@@ -64,7 +64,7 @@ self.uceRequire = (function (exports) {
               xhr.send(null);
 
               xhr.onload = function () {
-                $(cache[key] = cjs.loader(xhr.responseText));
+                $(cache[key] = loader(xhr.responseText));
               };
             } else {
               defineProperty(cache, key, {
@@ -107,7 +107,7 @@ self.uceRequire = (function (exports) {
       return k.length === 1 && k[0] === 'default' ? result["default"] : result;
     };
   };
-  cjs.loader = cjs();
+  var loader = cjs();
   if (!Promise$1.all) Promise$1.all = function (list) {
     return new Promise$1(function ($) {
       var length = list.length;

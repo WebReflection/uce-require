@@ -60,7 +60,7 @@ export const asCJS = (esm, require) => {
             xhr.open('get', key, true);
             xhr.send(null);
             xhr.onload = () => {
-              $(cache[key] = cjs.loader(xhr.responseText));
+              $(cache[key] = loader(xhr.responseText));
             };
           }
           else {
@@ -97,7 +97,7 @@ export const cjs = extras => {
   };
 };
 
-cjs.loader = cjs();
+const loader = cjs();
 
 if (!Promise.all)
   Promise.all = list => new Promise($ => {
