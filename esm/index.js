@@ -1,13 +1,27 @@
 import Promise from '@webreflection/lie';
+if (!Promise.all)
+  Promise.all = list => new Promise($ => {
+    const {length} = list;
+    if (!length)
+      $();
+    let i = 0;
+    while (i < length)
+      list[i++].then(update);
+    i = 0;
+    function update() {
+      if (++i === length) $();
+    }
+  });
 
 const {create, defineProperty, keys} = Object;
-
-export const cache = create(null);
-export const waiting = {};
 
 const lazyModules = [];
 const strict = '"use strict;"\n';
 const $require = module => cache[module];
+
+export const cache = create(null);
+
+export const waiting = {};
 
 export const asCJS = (esm, require) => {
   const exports = [];
@@ -97,18 +111,4 @@ export const cjs = extras => {
   };
 };
 
-const loader = cjs();
-
-if (!Promise.all)
-  Promise.all = list => new Promise($ => {
-    const {length} = list;
-    if (!length)
-      $();
-    let i = 0;
-    while (i < length)
-      list[i++].then(update);
-    i = 0;
-    function update() {
-      if (++i === length) $();
-    }
-  });
+export const loader = cjs();

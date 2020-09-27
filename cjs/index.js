@@ -1,16 +1,30 @@
 'use strict';
 const Promise = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@webreflection/lie'));
+if (!Promise.all)
+  Promise.all = list => new Promise($ => {
+    const {length} = list;
+    if (!length)
+      $();
+    let i = 0;
+    while (i < length)
+      list[i++].then(update);
+    i = 0;
+    function update() {
+      if (++i === length) $();
+    }
+  });
 
 const {create, defineProperty, keys} = Object;
-
-const cache = create(null);
-exports.cache = cache;
-const waiting = {};
-exports.waiting = waiting;
 
 const lazyModules = [];
 const strict = '"use strict;"\n';
 const $require = module => cache[module];
+
+const cache = create(null);
+exports.cache = cache;
+
+const waiting = {};
+exports.waiting = waiting;
 
 const asCJS = (esm, require) => {
   const exports = [];
@@ -103,17 +117,4 @@ const cjs = extras => {
 exports.cjs = cjs;
 
 const loader = cjs();
-
-if (!Promise.all)
-  Promise.all = list => new Promise($ => {
-    const {length} = list;
-    if (!length)
-      $();
-    let i = 0;
-    while (i < length)
-      list[i++].then(update);
-    i = 0;
-    function update() {
-      if (++i === length) $();
-    }
-  });
+exports.loader = loader;

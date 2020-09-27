@@ -19,11 +19,26 @@ self.uceRequire = (function (exports) {
     }
   };
 
+  if (!Promise$1.all) Promise$1.all = function (list) {
+    return new Promise$1(function ($) {
+      var length = list.length;
+      if (!length) $();
+      var i = 0;
+
+      while (i < length) {
+        list[i++].then(update);
+      }
+
+      i = 0;
+
+      function update() {
+        if (++i === length) $();
+      }
+    });
+  };
   var create = Object.create,
       defineProperty = Object.defineProperty,
       keys = Object.keys;
-  var cache = create(null);
-  var waiting = {};
   var lazyModules = [];
   var strict = '"use strict;"\n';
 
@@ -31,6 +46,8 @@ self.uceRequire = (function (exports) {
     return cache[module];
   };
 
+  var cache = create(null);
+  var waiting = {};
   var asCJS = function asCJS(esm, require) {
     var exports = [];
     var imports = [];
@@ -108,27 +125,11 @@ self.uceRequire = (function (exports) {
     };
   };
   var loader = cjs();
-  if (!Promise$1.all) Promise$1.all = function (list) {
-    return new Promise$1(function ($) {
-      var length = list.length;
-      if (!length) $();
-      var i = 0;
-
-      while (i < length) {
-        list[i++].then(update);
-      }
-
-      i = 0;
-
-      function update() {
-        if (++i === length) $();
-      }
-    });
-  };
 
   exports.asCJS = asCJS;
   exports.cache = cache;
   exports.cjs = cjs;
+  exports.loader = loader;
   exports.waiting = waiting;
 
   return exports;
