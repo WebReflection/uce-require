@@ -6,6 +6,7 @@ const {create, defineProperty, keys} = Object;
 const cache = create(null);
 exports.cache = cache;
 
+const lazyModules = [];
 const strict = '"use strict;"\n';
 const $require = module => cache[module];
 
@@ -44,7 +45,7 @@ const asCJS = (esm, require) => {
       }
     )
     .concat('\n', exports.join('\n'))
-    .replace(/require\s*\((['"])([^\1]+?)\1\s*\)/g, ($, _, module) => {
+    .replace(/require\s*\(\s*(['"])([^\1]+?)\1\s*\)/g, ($, _, module) => {
       imports.push(module);
       return $;
     })
@@ -52,21 +53,30 @@ const asCJS = (esm, require) => {
   if (require) {
     imports.forEach(key => {
       if (!(key in cache)) {
-        let module = /^(?:[./]|https?:)/.test(key) ?
-          load(key, key) :
-          new Promise($ => {
+        lazyModules.push(new Promise($ => {
+          let module = null;
+          if (/^(?:[./]|https?:)/.test(key)) {
+            cache[key] = module;
+            const xhr = new XMLHttpRequest;
+            xhr.open('get', path, true);
+            xhr.send(null);
+            xhr.onload = () => {
+              $(cache[key] = cjs.loader(xhr.responseText));
+            };
+          }
+          else {
             defineProperty(cache, key, {
-              get() { return module; },
-              set(value) {
+              get: () => module,
+              set: value => {
                 $(module = value);
               }
-            })
-          });
-        all.push(cache[key] = module);
+            });
+          }
+        }));
       }
     });
     return new Promise($ => {
-      Promise.all(all).then(() => $(cjs));
+      Promise.all(lazyModules).then(() => $(cjs));
     });
   }
   return cjs;
@@ -105,13 +115,3 @@ if (!Promise.all)
       if (++i === length) $();
     }
   });
-
-const all = [];
-const load = (module, path) => new Promise($ => {
-  const xhr = new XMLHttpRequest;
-  xhr.open('get', path, true);
-  xhr.send(null);
-  xhr.onload = () => {
-    $(cache[module] = cjs.loader(xhr.responseText));
-  };
-});

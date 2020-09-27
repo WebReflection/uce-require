@@ -23,6 +23,7 @@ self.uceRequire = (function (exports) {
       defineProperty = Object.defineProperty,
       keys = Object.keys;
   var cache = create(null);
+  var lazyModules = [];
   var strict = '"use strict;"\n';
 
   var $require = function $require(module) {
@@ -44,7 +45,7 @@ self.uceRequire = (function (exports) {
     }).replace(/(^|[\r\n])\s*export\s+(const|let|var|function)(\s+)(\w+)/g, function (_, $, $1, $2, $3) {
       exports.push("exports.".concat($3, " = ").concat($3, ";"));
       return $ + $1 + $2 + $3;
-    }).concat('\n', exports.join('\n')).replace(/require\s*\((['"])([^\1]+?)\1\s*\)/g, function ($, _, module) {
+    }).concat('\n', exports.join('\n')).replace(/require\s*\(\s*(['"])([^\1]+?)\1\s*\)/g, function ($, _, module) {
       imports.push(module);
       return $;
     });
@@ -52,21 +53,33 @@ self.uceRequire = (function (exports) {
     if (require) {
       imports.forEach(function (key) {
         if (!(key in cache)) {
-          var module = /^(?:[./]|https?:)/.test(key) ? load(key, key) : new Promise$1(function ($) {
-            defineProperty(cache, key, {
-              get: function get() {
-                return module;
-              },
-              set: function set(value) {
-                $(module = value);
-              }
-            });
-          });
-          all.push(cache[key] = module);
+          lazyModules.push(new Promise$1(function ($) {
+            var module = null;
+
+            if (/^(?:[./]|https?:)/.test(key)) {
+              cache[key] = module;
+              var xhr = new XMLHttpRequest();
+              xhr.open('get', path, true);
+              xhr.send(null);
+
+              xhr.onload = function () {
+                $(cache[key] = cjs.loader(xhr.responseText));
+              };
+            } else {
+              defineProperty(cache, key, {
+                get: function get() {
+                  return module;
+                },
+                set: function set(value) {
+                  $(module = value);
+                }
+              });
+            }
+          }));
         }
       });
       return new Promise$1(function ($) {
-        Promise$1.all(all).then(function () {
+        Promise$1.all(lazyModules).then(function () {
           return $(cjs);
         });
       });
@@ -109,19 +122,6 @@ self.uceRequire = (function (exports) {
       function update() {
         if (++i === length) $();
       }
-    });
-  };
-  var all = [];
-
-  var load = function load(module, path) {
-    return new Promise$1(function ($) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('get', path, true);
-      xhr.send(null);
-
-      xhr.onload = function () {
-        $(cache[module] = cjs.loader(xhr.responseText));
-      };
     });
   };
 
