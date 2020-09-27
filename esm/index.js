@@ -3,6 +3,7 @@ import Promise from '@webreflection/lie';
 const {create, defineProperty, keys} = Object;
 
 export const cache = create(null);
+export const waiting = {};
 
 const lazyModules = [];
 const strict = '"use strict;"\n';
@@ -52,7 +53,7 @@ export const asCJS = (esm, require) => {
     imports.forEach(key => {
       if (!(key in cache)) {
         lazyModules.push(new Promise($ => {
-          let module = null;
+          let module = waiting;
           if (/^(?:[./]|https?:)/.test(key)) {
             cache[key] = module;
             const xhr = new XMLHttpRequest;

@@ -5,6 +5,8 @@ const {create, defineProperty, keys} = Object;
 
 const cache = create(null);
 exports.cache = cache;
+const waiting = {};
+exports.waiting = waiting;
 
 const lazyModules = [];
 const strict = '"use strict;"\n';
@@ -54,7 +56,7 @@ const asCJS = (esm, require) => {
     imports.forEach(key => {
       if (!(key in cache)) {
         lazyModules.push(new Promise($ => {
-          let module = null;
+          let module = waiting;
           if (/^(?:[./]|https?:)/.test(key)) {
             cache[key] = module;
             const xhr = new XMLHttpRequest;

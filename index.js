@@ -23,6 +23,7 @@ self.uceRequire = (function (exports) {
       defineProperty = Object.defineProperty,
       keys = Object.keys;
   var cache = create(null);
+  var waiting = {};
   var lazyModules = [];
   var strict = '"use strict;"\n';
 
@@ -54,7 +55,7 @@ self.uceRequire = (function (exports) {
       imports.forEach(function (key) {
         if (!(key in cache)) {
           lazyModules.push(new Promise$1(function ($) {
-            var module = null;
+            var module = waiting;
 
             if (/^(?:[./]|https?:)/.test(key)) {
               cache[key] = module;
@@ -128,6 +129,7 @@ self.uceRequire = (function (exports) {
   exports.asCJS = asCJS;
   exports.cache = cache;
   exports.cjs = cjs;
+  exports.waiting = waiting;
 
   return exports;
 
