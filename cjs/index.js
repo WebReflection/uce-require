@@ -60,7 +60,7 @@ const asCJS = (esm, require) => {
           if (/^(?:[./]|https?:)/.test(key)) {
             cache[key] = module;
             const xhr = new XMLHttpRequest;
-            xhr.open('get', path, true);
+            xhr.open('get', key, true);
             xhr.send(null);
             xhr.onload = () => {
               $(cache[key] = cjs.loader(xhr.responseText));

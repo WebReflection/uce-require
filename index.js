@@ -60,7 +60,7 @@ self.uceRequire = (function (exports) {
             if (/^(?:[./]|https?:)/.test(key)) {
               cache[key] = module;
               var xhr = new XMLHttpRequest();
-              xhr.open('get', path, true);
+              xhr.open('get', key, true);
               xhr.send(null);
 
               xhr.onload = function () {
