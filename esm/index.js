@@ -49,7 +49,7 @@ export const asCJS = (esm, require) => {
   ;
   if (require) {
     imports.forEach(key => {
-      if (!(key in cache)) {
+      if (!(key in cache) && /^(?:[./]|https?:)/.test(key)) {
         cache[key] = void 0;
         all.push(load(key, key));
       }
