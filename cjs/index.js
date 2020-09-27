@@ -1,7 +1,7 @@
 'use strict';
 const Promise = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@webreflection/lie'));
 
-const {create, keys} = Object;
+const {create, defineProperty, keys} = Object;
 
 const cache = create(null);
 exports.cache = cache;
@@ -51,9 +51,23 @@ const asCJS = (esm, require) => {
   ;
   if (require) {
     imports.forEach(key => {
-      if (!(key in cache) && /^(?:[./]|https?:)/.test(key)) {
-        cache[key] = void 0;
-        all.push(load(key, key));
+      if (!(key in cache)) {
+        let module = null;
+        // external files
+        if (/^(?:[./]|https?:)/.test(key)) {
+          cache[key] = module;
+          all.push(load(key, key));
+        }
+        // resolved lazily
+        else
+          all.push(new Promise($ => {
+            defineProperty(cache, key, {
+              get() { return module; },
+              set(value) {
+                $(module = value);
+              }
+            })
+          }));
       }
     });
     return new Promise($ => {

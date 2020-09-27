@@ -20,6 +20,7 @@ self.uceRequire = (function (exports) {
   };
 
   var create = Object.create,
+      defineProperty = Object.defineProperty,
       keys = Object.keys;
   var cache = create(null);
   var strict = '"use strict;"\n';
@@ -50,9 +51,23 @@ self.uceRequire = (function (exports) {
 
     if (require) {
       imports.forEach(function (key) {
-        if (!(key in cache) && /^(?:[./]|https?:)/.test(key)) {
-          cache[key] = void 0;
-          all.push(load(key, key));
+        if (!(key in cache)) {
+          var module = null; // external files
+
+          if (/^(?:[./]|https?:)/.test(key)) {
+            cache[key] = module;
+            all.push(load(key, key));
+          } // resolved lazily
+          else all.push(new Promise$1(function ($) {
+              defineProperty(cache, key, {
+                get: function get() {
+                  return module;
+                },
+                set: function set(value) {
+                  $(module = value);
+                }
+              });
+            }));
         }
       });
       return new Promise$1(function ($) {
