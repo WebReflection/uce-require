@@ -1,6 +1,6 @@
 {
   "name": "uce-require",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A silly ESM to CJS converter and loader",
   "main": "./cjs/index.js",
   "scripts": {
